@@ -3,6 +3,7 @@ let s:save_cpo = &cpo| set cpo&vim
 "=============================================================================
 
 let g:laptimes = {}
+let s:stock = {}
 let s:count = 0
 function! s:_lt_num() "{{{
   let s:count += 1
@@ -10,6 +11,7 @@ function! s:_lt_num() "{{{
 endfunction
 "}}}
 
+"======================================
 let s:lt = {}
 function! s:lt.lap(...)
   call add(self.messages, get(a:, 1, ''))
@@ -23,12 +25,24 @@ function! s:lt.end(...)
   call map(self.laptimes, 'reltimestr(v:val)')
   let i = 0
   let len = len(self.totaltimes)
-  let self.result .= "       TOTAL       LAP\n"
+  let self.result = self.__caption__
+  let self.result .= "\n       TOTAL       LAP      ". (self.contain ? 'contain: '. self.contain : ''). "\n"
   while i < len
     let self.result .= printf("%3d: %s  %s  %s\n", i+1, self.totaltimes[i], self.laptimes[i], self.messages[i])
     let i += 1
   endwhile
   let g:laptimes[self.num] = self.result
+  let before_lt = get(s:stock, self.num-1, {})
+  if before_lt != {} && before_lt.isnot_ended()
+    let before_lt.contain = self.num
+    call extend(self, before_lt)
+  else
+    call filter(s:stock, 'v:key == self.num')
+  endif
+endfunction
+
+function! s:lt.isnot_ended()
+  return self.result == ''
 endfunction
 
 function! s:lt.show()
@@ -38,10 +52,10 @@ endfunction
 
 
 function! laptime#new(...) "{{{
-  let lt = {'laptimes': [], 'totaltimes': [[0, 0]], 'messages': [], '__caption__': get(a:, 1, '')}
-  let lt.result = lt.__caption__. "\n"
+  let lt = {'laptimes': [], 'totaltimes': [[0, 0]], 'messages': [], '__caption__': get(a:, 1, ''), 'contain': 0, 'result': ''}
   let lt.num = s:_lt_num()
   call extend(lt, s:lt, 'keep')
+  let s:stock[lt.num] = lt
   let lt.start = reltime()
   return lt
 endfunction
