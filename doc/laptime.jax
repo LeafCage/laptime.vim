@@ -1,0 +1,112 @@
+*laptime.txt*	スクリプトの2点間と、その中間点までの実行時間を計測する。
+
+Author  : LeafCage <leafcage+vim @ gmail.com>
+License : MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+==============================================================================
+目次						*laptime-contents*
+
+概要				|laptime-introduction|
+使い方				|laptime-usage|
+インターフェイス		|laptime-interface|
+関数				|laptime-functions|
+変数				|laptime-variables|
+
+
+==============================================================================
+概要						*laptime-introduction*
+
+*laptime* はスクリプトの2点間の実行時間を計測することが出来ます。さらにその中
+間点までの実行時間も計測できます。
+
+
+最新版:
+https://github.com/LeafCage/laptime.vim
+
+
+==============================================================================
+使い方						*laptime-usage*
+
+計測を始めたい行に、以下のような記述をしてください。 >
+	let lt = laptime#new()
+中間経過時間を記録したい行に以下のような記述をしてください。複数記述できます。 >
+	call lt.lap()
+計測を終了したい行に、以下のような記述をしてください。 >
+	call lt.end()
+ここまででひとまとまりの記録として扱われます。
+これの計測結果を見たい時には、以下の記述で表示できます。 >
+	call lt.show()
+
+また、|g:laptimes| にそれまでの計測結果が記録されているので、過去の記録を閲覧
+したい時などには、以下のコマンドでできます。 >
+	:call g:laptimes.show()
+
+
+==============================================================================
+インターフェイス				*laptime-interface*
+
+------------------------------------------------------------------------------
+関数						*laptime-functions*
+
+laptime#new([{name}, [...]])			*laptime#new*
+	実行時間計測用オブジェクト|Laptime|を返します。
+	省略可能な引数に、このオブジェクトの任意の名前を指定できます。
+
+	オブジェクト|Laptime|には以下の振る舞いが定義されています。
+	lap([{name}, [...]])
+		自身が作られてから現在までの時間を記録に残します。
+		省略可能な引数には、名前の他、任意の値を渡すことも出来、複数渡
+		すこともできます。
+		渡されたものは一緒に記録に残されます。
+	end([{name}, [...]])
+		自身が作られてから現在までの時間を記録に残した後、計測を終了し
+		ます。省略可能な引数は|lap()|のものと同じです。
+		|end()|を呼ばないと記録された計測結果は閲覧できる状態になりま
+		せん。
+	show()
+		自身に記録された計測結果を表示します。|end()|されていないと何
+		も起こりません。
+
+
+------------------------------------------------------------------------------
+変数						*laptime-variables*
+
+g:laptimes					*g:laptimes*
+	|Laptime|が|end()|された時に自動で作成される辞書です。
+	今までの|end()|された|Laptime|の計測結果を記録しています。
+	しかし|g:laptimes.disable|属性に非0を入れておくことでこの記録するのを
+	やめさせることが出来ます。
+
+	以下の振る舞いが定義されています。
+	show([{begin}, [{count}]])
+		今までの計測結果を一覧します。結果は古いもの順で全て表示されま
+		す。
+		{begin}を指定すると、{begin}番目以降の結果だけが表示されます。
+		ただし、負の数を指定すると、最後から-{begin}番目以降の結果が表
+		示されます。（-1だと一番最後の結果のみ、-3だと最後から3番目か
+		ら一番最後までという具合に。）
+		{count}を指定すると、{begin}番目以降から{count}個の結果を表示
+		します。ただし、負の数を指定すると、{begin}番目以降から、最後
+		から-{count}番目の結果までを表示します。
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:fdl=0:
